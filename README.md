@@ -1,1 +1,2 @@
-# Repo for extra code used for Decoding Nature Class (Nature of Code)
+# Decoding Nature 
+Repo for extra code examples not found [here](https://github.com/shiffman/The-Nature-of-Code-Examples).
