@@ -1,41 +1,41 @@
-int numMovers = 60;
+int numMovers = 11;
 
 Mover[] points = new Mover[numMovers];
 Spring[] springs = new Spring[numMovers];
 
 void setup() {
   size(640, 480);
-  float angle = 0;
+  float angle = -HALF_PI;
   float inc = TWO_PI/numMovers;
-  float radius = 200;
-  float len = 50;
+  float radius = 5;
+  float len = 100;
   for (int i = 0; i< numMovers; i++) {
     float x = width/2+cos(angle)*radius;
     float y = height/2+sin(angle)*radius;
     points[i] = new Mover(24, x, y);
-    if (i>0) {
-      springs[i-1] = new Spring(points[i-1].position.x, points[i-1].position.y, len);
-    }
+    springs[i] = new Spring(points[i].position.x, points[i].position.y, len);
     angle += inc;
   }
-
 
   background(255);
 }
 
 void draw() {
+  //background(255);
+  stroke(0,10);
 
-  //spring.anchor.set(mouseX, mouseY,0);
-  //spring.update(bob);
-  //spring.display(bob);
+  for (int i=0; i<numMovers; i++) {
+    if (i>0) {
+      springs[i-1].anchor = points[i-1].position.copy();
+      springs[i-1].update(points[i]);
+      springs[i-1].display(points[i]);
+    } else if (i==0) {
+      springs[numMovers-1].anchor = points[numMovers-1].position.copy();
+      springs[numMovers-1].update(points[i]);
+      springs[numMovers-1].display(points[i]);
 
-  PVector gravity = new PVector(0, 4);
- 
-  for (int i=0;i<numMovers;i++) {
-    //springs[i];
-    if (i>1)
-      springs[i].display(points[i-1]);
-    points[i].display();
-    i++;
+    }
+    points[i].update();
+    //points[i].display();
   }
 }
