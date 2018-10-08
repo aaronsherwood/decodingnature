@@ -20,7 +20,7 @@ class Particle {
     lifespan = 255.0;
     mass = 1;//random(1, 10); // Let's do something better here!
 
-    damping = .985;
+    damping = .99;
     nOffx = random(0, 10000);
     nOffy = random(0, 10000);
   }
@@ -64,7 +64,21 @@ class Particle {
   }
 
   void applyWind() {
-    PVector wind = new PVector((noise(nOffx, nOffy)-.5)*(sin(nOffx*.05)*.035), (noise(nOffy)-.5)*(sin(nOffy*.05)*.035));
+    
+    //noise to make them move and -.5 to move both left and right
+    float xNoise = noise(nOffx, nOffy) - .5;
+    //scale the noise by sine
+    //make it oscillate slowly close to zero
+    float xScale = sin(nOffx*.05)*.035;
+    //set x value
+    float x =  xNoise * xScale;
+    
+    //same as x
+    float yNoise = noise(nOffx, nOffy)-.5;
+    float yScale = sin(nOffy*.05)*.035;
+    float y = yNoise * yScale;
+    
+    PVector wind = new PVector( x, y);
     applyForce(wind);
     nOffx+=.001;
     nOffy+=.001;
