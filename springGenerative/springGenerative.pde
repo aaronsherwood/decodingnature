@@ -5,9 +5,9 @@ int numMovers = 50;
 Mover[] points = new Mover[numMovers];
 Spring[] springs = new Spring[numMovers*2];
 
-boolean middleAttached = true;
+boolean middleAttached = false;
 boolean dontComplete = false;
-boolean record = true;
+boolean record = false;
 String fileName = "test_";
 
 void setup() {
