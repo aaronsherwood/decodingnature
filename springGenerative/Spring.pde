@@ -6,7 +6,7 @@ class Spring{
   Spring(float x, float y, float len){
     anchor = new PVector(x,y);
     restingLength = len;
-    k = .005;
+    k = .03;
   }
   
   void update(Mover m){

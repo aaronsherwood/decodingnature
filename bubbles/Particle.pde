@@ -19,7 +19,7 @@ class Particle {
     pos = l.get();
     lifespan = 255.0;
     img = img_;
-    size = random(10,70);
+    size = random(5,70);
     mass = 1;
   }
 
@@ -39,15 +39,17 @@ class Particle {
   void update() {
     vel.add(acc);
     pos.add(vel);
-    lifespan -= 2;
+    lifespan -= 1.2;
     acc.mult(0); // clear Acceleration
   }
 
   // Method to display
   void render() {
+    pushStyle();
     imageMode(CENTER);
     tint(255,lifespan);
     image(img,pos.x,pos.y, size, size);
+    popStyle();
     // Drawing a circle instead
     // fill(255,lifespan);
     // noStroke();

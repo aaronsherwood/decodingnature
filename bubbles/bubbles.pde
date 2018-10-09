@@ -2,10 +2,12 @@ ParticleSystem ps;
 Particle mover;
 
 boolean useMouse = true;
+PImage bg;
 
 void setup() {
   fullScreen(P3D);
   PImage img = loadImage("bubble.png");
+  bg = loadImage("gradient.png");
   ps = new ParticleSystem(0, new PVector(width/2, height-75), img);
   if (!useMouse) {
     ofSetup();
@@ -15,9 +17,13 @@ void setup() {
 }
 
 void draw() {
-  background(0);
+  //background(50);
+  pushStyle();
+  tint(130);
+  image(bg, 0, 0, width, height);
+  popStyle();
   float windX = 0;
-  
+
   //MOUSE
   if (useMouse) {
     ps.origin.set(mouseX, mouseY, 0);
@@ -27,15 +33,16 @@ void draw() {
         ps.addParticle();
       }
     }
-    
-  //OPTICAL FLOW
+
+    //OPTICAL FLOW
   } else {
     flow();
     ps.origin = mover.pos.copy();
     mover.run();
     if (mover.vel.mag()>2 || smoothedFlow.mag()>.1) {
       mover.applyForce(smoothedFlow);
-      ps.addParticle();
+      if (frameCount%2==0)
+        ps.addParticle();
     }
     windX = smoothedFlow.x*.25;
   }
@@ -43,5 +50,8 @@ void draw() {
   //RUN IT
   PVector wind = new PVector(windX, 0);
   ps.applyForce(wind);
+  pushStyle();
+  blendMode(ADD);
   ps.run();
+  popStyle();
 }
