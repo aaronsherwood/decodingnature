@@ -1,6 +1,6 @@
 import processing.pdf.*;
 
-int numMovers = 50;
+int numMovers = 3;
 
 Mover[] points = new Mover[numMovers];
 Spring[] springs = new Spring[numMovers*2];
@@ -8,15 +8,16 @@ Spring[] springs = new Spring[numMovers*2];
 boolean middleAttached = false;
 boolean dontComplete = false;
 boolean record = false;
-String fileName = "test_";
+boolean useMouse = false;
+String fileName = "circle_";
 
 void setup() {
   size(1280, 720, P3D);
   float angle = -HALF_PI;
   float inc = TWO_PI/numMovers;
-  float radius = 100;
-  float len = 30;
-  float noiseScale=10;
+  float radius = 200;
+  float len = 200;
+  float noiseScale=2;
   if (record) {
     fileName+=("numMovers_");
     fileName+=str(numMovers);
@@ -33,8 +34,8 @@ void setup() {
     fileName+=".pdf";
   }
   for (int i = 0; i< numMovers; i++) {
-    float x = (noise(i*.1, i*.2)*noiseScale)+width/2+cos(angle)*radius;
-    float y = (noise(i*.1, i*.2)*noiseScale)+height/2+sin(angle)*radius;
+    float x = ((noise(i*.1, i*.2)-.5)*noiseScale)+width/2+cos(angle)*radius;
+    float y = ((noise(i*.1, i*.2)-.5)*noiseScale)+height/2+sin(angle)*radius;
     points[i] = new Mover(24, x, y);
     if (dontComplete) {
       if (i<numMovers-1)
@@ -61,13 +62,17 @@ void draw() {
   for (int i=0; i<numMovers*2; i++) {
     if (i>numMovers) {
       if (middleAttached && !dontComplete) {
-        //springs[i-1].anchor.set(mouseX,mouseY,0);
+        if (useMouse)
+          springs[i-1].anchor.set(mouseX, mouseY, 0);
         springs[i-1].update(points[i-numMovers]);
-        //springs[i-1].display(points[i-numMovers]);
+        //comment out these next two lines for normal usage
+        springs[i-1].display(points[i-numMovers]);
+        springs[i-1].restingLength = (sin(frameCount*.01+i)+10)*50;
       }
     } else if (i==numMovers) {
       if (middleAttached && !dontComplete) {
-        //springs[numMovers*2-1].anchor.set(mouseX,mouseY,0);
+        if (useMouse)
+          springs[numMovers*2-1].anchor.set(mouseX, mouseY, 0);
         springs[numMovers*2-1].update(points[0]);
         //springs[numMovers*2-1].display(points[0]);
       }
@@ -78,6 +83,7 @@ void draw() {
       springs[i-1].anchor = points[index].position.copy();
       springs[i-1].update(points[i]);
       springs[i-1].display(points[i]);
+      
     } else if (i==0 && !dontComplete) {
       springs[numMovers-1].anchor = points[numMovers-1].position.copy();
       springs[numMovers-1].update(points[i]);
