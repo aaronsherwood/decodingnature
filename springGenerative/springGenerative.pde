@@ -5,14 +5,14 @@ int numMovers = 3;
 Mover[] points = new Mover[numMovers];
 Spring[] springs = new Spring[numMovers*2];
 
-boolean middleAttached = false;
+boolean middleAttached = true;
 boolean dontComplete = false;
 boolean record = false;
 boolean useMouse = false;
 String fileName = "circle_";
 
 void setup() {
-  size(1280, 720, P3D);
+  size(1200, 900, P3D);
   float angle = -HALF_PI;
   float inc = TWO_PI/numMovers;
   float radius = 200;
@@ -33,9 +33,11 @@ void setup() {
     fileName+=day()+"_"+month()+"_"+year()+"_"+hour()+"_"+minute()+"_"+second();
     fileName+=".pdf";
   }
+  float locx=300;
+  float locy=200;
   for (int i = 0; i< numMovers; i++) {
-    float x = ((noise(i*.1, i*.2)-.5)*noiseScale)+width/2+cos(angle)*radius;
-    float y = ((noise(i*.1, i*.2)-.5)*noiseScale)+height/2+sin(angle)*radius;
+    float x = ((noise(i*.1, i*.2)-.5)*noiseScale)+locx+cos(angle)*radius;
+    float y = ((noise(i*.1, i*.2)-.5)*noiseScale)+locy+sin(angle)*radius;
     points[i] = new Mover(24, x, y);
     if (dontComplete) {
       if (i<numMovers-1)
@@ -47,7 +49,7 @@ void setup() {
   }
   if (!dontComplete) {
     for (int i = numMovers; i< numMovers*2; i++) {
-      springs[i] = new Spring(width/2, height/2, len);
+      springs[i] = new Spring(locx, locy, len);
     }
   }
   if (record)
