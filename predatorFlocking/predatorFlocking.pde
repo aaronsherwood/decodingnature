@@ -27,7 +27,7 @@ void setup() {
 
 void draw() {
   background(255);
-  //predator moves vis perlin noise
+  //predator moves via perlin noise
   PVector predatorMovement = new PVector((noise(frameCount*.01)-.5),(noise(frameCount*.03)-.5));
   predator.applyForce(predatorMovement);
   //pass in all the boids to the predator
