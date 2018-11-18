@@ -2,7 +2,6 @@
 /* !do not delete the line above, required for linking your tweak if you re-upload */
 NavierStokesSolver fluidSolver;
 double visc, diff, limitVelocity, vScale, velocityScale;
-int oldMouseX = 1, oldMouseY = 1;
 int numParticles;
 
 Particle[] particles;
@@ -49,7 +48,8 @@ public void draw() {
   background(1);
 
   handleMouseMotion();
-
+  
+  //set the speed to adjust according to fluctations in the frame rate
   double dt = 1 / frameRate;
   fluidSolver.tick(dt, visc, diff);
 
@@ -73,22 +73,29 @@ private void drawParticles() {
     if (p != null) {
       int cellX = floor(p.x / cellWidth);
       int cellY = floor(p.y / cellHeight);
+      // get the fluid velocity
       float dx = (float) fluidSolver.getDx(cellX, cellY);
       float dy = (float) fluidSolver.getDy(cellX, cellY);
 
+      //distance from particle in cell to center of cell
       float lX = p.x - cellX * cellWidth - cellWidth / 2;
       float lY = p.y - cellY * cellHeight - cellHeight / 2;
 
       int v, h, vf, hf;
 
+      //if distance is greater than 0 take whatever is smaller, the total number
+      //horizontal/vertical cells or the current cell + 1
       if (lX > 0) {
         v = Math.min(n, cellX + 1);
         vf = 1;
-      } else {
+      } 
+      //otherwise go in the opposite direction (cell - 1)
+      else {
         v = Math.min(n, cellX - 1);
         vf = -1;
       }
-
+      
+      //same for y
       if (lY > 0) {
         h = Math.min(n, cellY + 1);
         hf = 1;
@@ -97,18 +104,29 @@ private void drawParticles() {
         hf = -1;
       }
 
-      float dxv = (float) fluidSolver.getDx(v, cellY);
-      float dxh = (float) fluidSolver.getDx(cellX, h);
-      float dxvh = (float) fluidSolver.getDx(v, h);
-
+      //lerp the velocity applied to each particle based on its distance from the center of the cell
+      float dxv = (float) fluidSolver.getDx(v, cellY); //one cell ahead or behind in X dim, current Y cell
+      float dxh = (float) fluidSolver.getDx(cellX, h); //current X cell, one cell ahead or behind in Y dim
+      float dxvh = (float) fluidSolver.getDx(v, h); //one cell ahead or behind in both X & Y dims
+      
+      //take the x distance times the x direction and divide by cell width
+      float xLerpAmount = vf * lX / cellWidth;
+      
+      //first lerp between the actual cell velocity and the velocity of the closest cell in X dim
+      float lerpX0 = lerp(dx, dxv, xLerpAmount); 
+      //next lerp between the velocity of the closest cell in Y dim and the velocity of the closest cell in X & Y dims
+      float lerpX1 = lerp(dxh, dxvh, xLerpAmount);
+      //finally lerp between both of those
+      dx = lerp(lerpX0, lerpX1, xLerpAmount);
+      
+      //same for y
+      float yLerpAmount = hf * lY / cellHeight;
       float dyv = (float) fluidSolver.getDy(v, cellY);
       float dyh = (float) fluidSolver.getDy(cellX, h);
       float dyvh = (float) fluidSolver.getDy(v, h);
-
-      dx = lerp(lerp(dx, dxv, hf * lY / cellWidth), lerp(dxh, dxvh, hf * lY / cellWidth), vf * lX / cellHeight);
-
-      dy = lerp(lerp(dy, dyv, hf * lY / cellWidth), lerp(dyh, dyvh, hf * lY / cellWidth), vf * lX / cellHeight);
-
+      dy = lerp(lerp(dy, dyv, yLerpAmount), lerp(dyh, dyvh, yLerpAmount), yLerpAmount);
+      
+      //change the particle location 
       p.x += dx * vScale;
       p.y += dy * vScale;
 
@@ -126,15 +144,20 @@ private void drawParticles() {
 }
 
 private void handleMouseMotion() {
+  //don't let the mouse equal 0
   mouseX = max(1, mouseX);
   mouseY = max(1, mouseY);
 
+  //get the cell dims
   int n = NavierStokesSolver.N;
   float cellHeight = height / n;
   float cellWidth = width / n;
 
-  double mouseDx = mouseX - oldMouseX;
-  double mouseDy = mouseY - oldMouseY;
+  //whic way is our mouse going, this is our force
+  double mouseDx = mouseX - pmouseX;
+  double mouseDy = mouseY - pmouseY;
+  
+  //cell location
   int cellX = floor(mouseX / cellWidth);
   int cellY = floor(mouseY / cellHeight);
 
@@ -142,14 +165,12 @@ private void handleMouseMotion() {
   //zero if the argument is zero, 
   //1.0f if the argument is greater than zero, 
   //-1.0f if the argument is less than zero.
-  //if above vel limit mult set to signum of mouse * vel limit, otherwise use mouse
+  //if above vel limit mult set to signum of mouse * vel limit, otherwise use mouse (i.e. -1*200 or 1*200 for direction)
   mouseDx = (abs((float) mouseDx) > limitVelocity) ? Math.signum(mouseDx) * limitVelocity : mouseDx;
   mouseDy = (abs((float) mouseDy) > limitVelocity) ? Math.signum(mouseDy) * limitVelocity : mouseDy;
 
+  //apply force
   fluidSolver.applyForce(cellX, cellY, mouseDx, mouseDy);
-
-  oldMouseX = mouseX;
-  oldMouseY = mouseY;
 }
 
 private void drawMotionVector(float scale) {
