@@ -100,7 +100,7 @@ void newframe() {
       //get the velocity of the wave using verlet integration: vel = pos - prevPos
       //says newind, but remember, we flip floped above so data is prevframe and _newind is 2 frames ago
       data -= ripplemap[_newind];
-      //damping, simular as saying *=.97 (100>>5=3, 100-3=97)
+      //damping, similar as saying *=.97 (100>>5=3, 100-3=97)
       data -= data >> 5;
       //now set the new ripplemap information
       ripplemap[_newind] = data;
