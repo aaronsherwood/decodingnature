@@ -13,6 +13,7 @@ void setup() {
 
 void draw() {
   ocean.set("time", millis() / 500.0); 
+  ocean.set("mouse",float(mouseX), float(mouseY));
   shader(ocean); 
   rect(0, 0, width, height);
 }
