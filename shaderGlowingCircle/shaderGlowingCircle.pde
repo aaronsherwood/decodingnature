@@ -23,12 +23,12 @@ void draw() {
   shader(mShader);
   rect(0,0,width,height);
   
-  a.position.set(mouseX, mouseY,0);
+  //a.position.set(mouseX, mouseY,0);
   
-  for (int i = 0; i < particles.length; i++) {
-    PVector force = a.attract(particles[i]);
-    particles[i].applyForce(force);
-    particles[i].update();
-    particles[i].display();
-  }
+  //for (int i = 0; i < particles.length; i++) {
+  //  PVector force = a.attract(particles[i]);
+  //  particles[i].applyForce(force);
+  //  particles[i].update();
+  //  particles[i].display();
+  //}
 }

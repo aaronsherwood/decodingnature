@@ -20,6 +20,7 @@ void draw() {
   mShader.set("scale", map(mouseY, 0, height, 0, .01) );
   mShader.set("mouse", float(mouseX-width/2), float(mouseY-height/2));
   mShader.set("frequency", freq);
+  mShader.set("deformAmount", 100.f);
   mShader.set("amplitude", map(mouseX, 0, width, 0, 50));
   mShader.set("circle", circle);
   shader(mShader);

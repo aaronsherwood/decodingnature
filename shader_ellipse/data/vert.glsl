@@ -139,6 +139,7 @@ uniform vec4 viewport;
 uniform vec2 mouse;
 uniform vec2 resolution;
 uniform bool mousePressed;
+uniform float deformAmount;
 
 attribute vec4 position;
 attribute vec4 color;
@@ -175,8 +176,8 @@ void main() {
         d /= len;
         
         //apply the repulsion to our position
-        pos.x += d.x * pct * 100.0f;
-        pos.y += d.y * pct * 100.0f;
+        pos.x += d.x * pct * deformAmount;
+        pos.y += d.y * pct * deformAmount;
     }
 
     //adjust points based with noise
