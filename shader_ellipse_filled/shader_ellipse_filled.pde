@@ -4,6 +4,7 @@ float freq = .0003f;
 float amp = 7.;
 boolean circle = false;
 PVector position;
+float fleeFollow = 1;
 
 void setup() {
   size(800, 800, P3D);
@@ -36,7 +37,8 @@ void draw() {
   //subtract the current position from the mosue position to get direction towards mouse
   PVector mouseVelocity = new PVector(mouseX, mouseY).sub(position);
   //scale that vector down to 1%
-  mouseVelocity.mult(.01);
+  //also if mousepressed make the circle move away from the mouse
+  mouseVelocity.mult(.01*fleeFollow);
   //add these velocities to the position
   position.add(noiseVelocity);
   position.add(mouseVelocity);
@@ -54,8 +56,10 @@ void keyPressed() {
 
 void mousePressed() {
   mShader.set("mousePressed", true);
+  fleeFollow = -1;
 }
 
 void mouseReleased() {
   mShader.set("mousePressed", false);
+  fleeFollow = 1;
 }
