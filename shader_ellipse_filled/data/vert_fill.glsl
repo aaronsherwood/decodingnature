@@ -1,3 +1,5 @@
+#define PROCESSING_COLOR_SHADER
+
 //all stuff for noise
 vec4 mod289(vec4 x) {
     return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -117,7 +119,6 @@ float snoise(vec4 v)
     
 }
 
-
 #define M_PI 3.1415926535897932384626433832795
 //handy function for mapping values
 float lmap(float val, float inMin, float inMax, float outMin, float outMax)
@@ -128,38 +129,21 @@ float lmap(float val, float inMin, float inMax, float outMin, float outMax)
     
 }
 
-mat4 rotateX = mat4(01.0000,  00.0000,  00.0000, -50.0000,
-                    00.0000, -00.0000, -01.0000, -50.0000,
-                    00.0000,  01.0000, -00.0000, -86.6025,
-                    00.0000,  00.0000,  00.0000,  01.0000);
-//mat4 rotateX = mat4(001.0000,  000.0000,  000.0000, -400.0000,
-//                    000.0000, -000.0000,  001.0000, -400.0000,
-//                    000.0000, -001.0000, -000.0000, -692.8203,
-//                    000.0000,  000.0000,  000.0000,  001.0000);
-//mat4 rotateX = mat4(001.0000,  000.0000,  000.0000, -400.0000,
-//                    000.0000, -001.0000, -000.0000, -400.0000,
-//                    000.0000,  000.0000, -001.0000, -692.8203,
-//                    000.0000,  000.0000,  000.0000,  001.0000);
-
-
 uniform float time;
 uniform float frequency;
 uniform float scale;
 uniform float amplitude;
-uniform vec3 stroke;
 uniform mat4 transform;
 uniform vec4 viewport;
 uniform vec2 mouse;
 uniform vec2 resolution;
-uniform float octaves;
-uniform bool extrude;
+uniform bool mousePressed;
+uniform float deformAmount;
 
 attribute vec4 position;
 attribute vec4 color;
 attribute vec4 direction;
 
-varying vec2 center;
-varying vec2 normal;
 varying vec4 vertColor;
 
 vec3 clipToWindow(vec4 clip, vec4 viewport) {
@@ -170,12 +154,10 @@ vec3 clipToWindow(vec4 clip, vec4 viewport) {
 
 void main() {
     vec4 pos = position;
-    vec3 col =stroke;
     //lets also figure out the distance between the mouse and the vertex and apply a repelling force away from the mouse
     vec2 d = vec2(pos.x, pos.y) - mouse;
     float len =  sqrt(d.x*d.x + d.y*d.y);
-    
-    if( len < 300 && len > 0  && extrude){
+    if( len < 300 && len > 0  && mousePressed){
         
         //lets get the distance into 0-1 ranges
         float pct = len / 300.0;
@@ -190,54 +172,18 @@ void main() {
         d /= len;
         
         //apply the repulsion to our position
-        pos.x += d.x * pct * 25.0f;
-        pos.y += d.y * pct * 25.0f;
-        bool sun = true;
-        if (len<25.&& sun){
-            mat4 trans = mat4(001.0000,  000.0000,  000.0000, pos.x,
-                              000.0000,  001.0000,  000.0000, pos.y,
-                              000.0000,  000.0000,  001.0000, -692.8203,
-                              000.0000,  000.0000,  000.0000,  001.0000);
-//            pos*=trans;
-//            pos*=rotateX;
-            float scaleY=(pos.y/resolution.y)*(pos.y/resolution.y);
-            pos.z += 150.f;//*((scaleY*.7)+.5);
-            float freq = .00014f;
-            float amp = 10.;
-            for (int i=1; i<octaves+9; i++) {
-                pos.x+=snoise(vec4(pos.xyz*float(i)*scale*1.5,time*freq*10.))*amp   *3./float(i);
-                pos.y+=snoise(vec4(pos.yzx*float(i)*scale*1.5,time*freq*10.))*amp*3./float(i);
-                pos.z+=snoise(vec4(pos.zxy*float(i)*scale*1.,time*freq*10.))*amp*3./float(i);
-            }
-            pos.x -= d.x * pct * 50.0f;
-            pos.y += d.y * pct * 100.0f;
-            col=vec3(1.,.64,0.);
-            pos.z-=pos.y*.1-20.;
-        } else if (len<10.)pos.z+=100.;
+        pos.x += d.x * pct * deformAmount;
+        pos.y += d.y * pct * deformAmount;
     }
 
     //adjust points based with noise
-    for (int i=1; i<octaves+1; i++) {
+    for (int i=1; i<2; i++) {
         //send in vec4, here we're making the vec4 with a jumbled vec3 based on the position, and a 4th number based on time
         pos.x+=snoise(vec4(pos.xyz*float(i)*scale,time*frequency))*amplitude/float(i);
         pos.y+=snoise(vec4(pos.yzx*float(i)*scale,time*frequency))*amplitude/float(i);
-        pos.z+=snoise(vec4(pos.zxy*float(i)*scale,time*frequency))*amplitude/float(i);
     }
-
+ 
     //processing stuff to render lines
-    vec4 clip0 =transform*pos;
-    vec4 clip1 = clip0 + transform * vec4(direction.xyz, 0);
-    float thickness = direction.w;
-    
-    vec3 win0 = clipToWindow(clip0, viewport);
-    vec3 win1 = clipToWindow(clip1, viewport);
-    vec2 tangent = win1.xy - win0.xy;
-    
-    normal = normalize(vec2(-tangent.y, tangent.x));
-    vec2 offset = normal * thickness;
-    gl_Position.xy = clip0.xy + offset.xy;
-    gl_Position.zw = clip0.zw;
-    vertColor = vec4(col,1.);//color;
-    
-    center = (win0.xy + win1.xy) / 2.0;
+    gl_Position =transform*pos;
+    vertColor = color;
 }
